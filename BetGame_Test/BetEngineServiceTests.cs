@@ -93,7 +93,6 @@ namespace BetGame.Tests
         [TestMethod]
         public void PlayRound_NoWin_WhenRollIsAtOrBelowHalf()
         {
-            // roll => 0.4 (<= 0.5) => no win path
             _randomMock.SetupSequence(r => r.NextDouble())
                 .Returns(0.4);
 
@@ -101,7 +100,6 @@ namespace BetGame.Tests
 
             var result = engine.PlayRound(5);
 
-            _consoleMock.Verify(c => c.WriteLine(It.Is<string>(s => s.StartsWith("You rolled:"))), Times.Once);
             Assert.AreEqual(0, result.WinAmount);
             StringAssert.Contains(result.Message, "No luck this time!");
             Assert.AreEqual(ConsoleColor.Red, result.Color);
@@ -110,10 +108,9 @@ namespace BetGame.Tests
         [TestMethod]
         public void PlayRound_SmallWin_WhenRollBetweenHalfAndPointNine()
         {
-            // roll => 0.7 => small win; jackpot RNG => 0.0 => multiplier = 1.1 + 0.4*0 = 1.1
             _randomMock.SetupSequence(r => r.NextDouble())
-                .Returns(0.7) // roll
-                .Returns(0.0); // jackpot multiplier
+                .Returns(0.7)
+                .Returns(0.0);
 
             var engine = new BetEngineService(_options, _randomMock.Object, _consoleMock.Object);
 
@@ -127,10 +124,9 @@ namespace BetGame.Tests
         [TestMethod]
         public void PlayRound_BigWin_WhenRollAbovePointNine()
         {
-            // roll => 0.95 => big win; jackpot RNG => 0.0 => multiplier = 2.0
-            _randomMock.SetupSequence(r => r.NextDouble())
-                .Returns(0.95) // roll
-                .Returns(0.0); // jackpot multiplier
+                _randomMock.SetupSequence(r => r.NextDouble())
+                .Returns(0.95)
+                .Returns(0.0);
 
             var engine = new BetEngineService(_options, _randomMock.Object, _consoleMock.Object);
 

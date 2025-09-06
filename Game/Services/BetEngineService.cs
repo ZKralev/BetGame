@@ -24,7 +24,6 @@ public class BetEngineService(IOptions<BetOptions> options, IRandomGenerator rnd
         double winAmount;
         double jackpotMult;
         double roll = GetRandomMultiplier(opt.MinimalRoll, opt.MaxRoll);
-        _console.WriteLine($"You rolled: {roll}");
 
         if (roll <= 0.5)
             return new BetResult(roll, "No luck this time! Your current balance is: $", 0, ConsoleColor.Red);

@@ -1,112 +1,112 @@
-# Bet Game (C# .NET Console)
+# BetGame
 
 A small console betting game built with C# and .NET. Manage a wallet, place bets, and try your luck with random multipliers.
 
-## Requirements
+## Prerequisites
 
 - .NET SDK 9.0 or later
   - Check your version: `dotnet --version`
 
-## Getting Started
+## Repository layout
 
-1. Clone this repository
-2. Open a terminal in the project root (`bet game/`)
-
-### Run (development)
-
-```bash
-# From the project directory
-dotnet run
+```
+BetGame/               # Solution root
+├── BetGame.sln        # Solution
+├── Game/              # Console application (this project)
+│   ├── Abstractions/  # Concrete wrappers & simple domain types (ConsoleWrapper, Wallet, BetResult)
+│   ├── Interfaces/    # Interfaces (IWallet, IConsoleWrapper, IBetEngine, etc.)
+│   ├── Models/        # Options & enums (BetOptions, MenuOptions)
+│   ├── Services/      # Core services (WalletService, BetEngineService, GameRunnerService)
+│   ├── appsettings.json
+│   └── BetGame.csproj
+└── BetGame_Test/      # MSTest test project
+    └── BetGame_Test.csproj
 ```
 
-### Build
+## Running the app
+
+From the solution root:
 
 ```bash
-# Build Debug
-dotnet build
-
-# Build Release
-dotnet build -c Release
+# Run the console app
+dotnet run --project .\Game
 ```
 
-After building, binaries will be in:
-- `bin/Debug/net9.0/` (Debug)
-- `bin/Release/net9.0/` (Release)
-
-## How to Play
-
-On launch you will see a menu:
+The game will display a menu:
 
 - 1) Deposit
 - 2) Withdraw
 - 3) Place Bet
 - 0) Exit
 
-Enter the number of your choice and follow the prompts.
+## Building
 
-Balances and winnings are displayed with two decimal places (e.g., `$12.50`).
-
-## Game Rules
-
-- Min/Max bet: `1` to `10` (see `BetEngine.MinBet`/`MaxBet`)
-- Each bet rolls a number from 1 to 10 (inclusive):
-  - 1–5: Lose the stake
-  - 6–9: Win a random multiplier in the range [0.0, 2.0) × stake
-  - 10: Win a random multiplier in the range [2.0, 10.0) × stake
-- Your wallet balance is updated as: `balance = balance - stake + winAmount`
-
-Note: The multiplier ranges are half-open intervals; the upper bound is not included.
-
-## Example Session
-
-```text
-=== Bet Game ===
-1) Deposit
-2) Withdraw
-3) Place Bet
-0) Exit
-Please submit your action: 1
-Enter amount to deposit: 20
-Current Balance: $20.00
-
-Please submit your action: 3
-Enter amount between 1 and 10 to bet: 5
-Congratulations! You win 7.35! Your current balance is:  $22.35
-
-Please submit your action: 2
-Enter amount to withdraw: 10
-Current Balance: $12.35
-
-Please submit your action: 0
-Goodbye! :)
+```bash
+# Build all projects (Debug)
+dotnet build .\BetGame.sln
 ```
-
-## Project Structure
-
-- `Program.cs`
-  - Console UI loop and menu
-  - Actions: `Deposit()`, `Withdraw()`, `PlaceBet()`
-- `Wallet.cs`
-  - Tracks `Balance`
-  - Methods: `TryDeposit()`, `TryWithdraw()`, `TryPlaceBet()`
-- `BetEngine.cs`
-  - Game constants: `MinBet`, `MaxBet`
-  - Core logic: `PlayRound(stake)` returns `BetResult`
-  - Outcome probabilities and multipliers
-- `MenuOptions.cs`
-  - Enum for menu choices
 
 ## Configuration
 
-- Change bet limits in `BetEngine.cs`:
-  - `public const int MinBet = 1;`
-  - `public const int MaxBet = 10;`
-- Default starting balance is `0`. You can pass an initial value to `Wallet`'s constructor if you want to start with funds.
+The console app reads options from `Game/appsettings.json` under the `BetOptions` section. Example:
 
-## Notes
+```json
+{
+  "BetOptions": {
+    "SmallestBet": 1,
+    "BiggestBet": 10,
+    "MinimalRoll": 0,
+    "MaxRoll": 1,
+    "SmallWin": {
+      "WinRatioStart": 1.1,
+      "WinRatioEnd": 0.4
+    },
+    "BigWin": {
+      "WinRatioStart": 2.0,
+      "WinRatioEnd": 1.0
+    }
+  }
+}
+```
 
-- This sample uses `double` for monetary values. For production scenarios, prefer `decimal` to avoid floating‑point rounding issues.
+## Testing
+
+I use MSTest + Moq. To run all tests:
+
+```bash
+# From the solution root
+dotnet test .\BetGame.sln
+```
+
+## Code Coverage
+
+This solution uses the `coverlet.collector` data collector. To collect coverage and generate an HTML report:
+
+```bash
+# 1) Collect coverage (Cobertura)
+dotnet test .\BetGame.sln --collect:"XPlat Code Coverage" --results-directory .\TestResults\Coverage
+
+# 2) Generate HTML report (requires reportgenerator)
+# If not installed:
+dotnet tool install -g dotnet-reportgenerator-globaltool
+
+reportgenerator -reports:"TestResults\Coverage\**\coverage.cobertura.xml" \
+  -targetdir:"TestResults\CoverageReport" \
+  -reporttypes:"Html;HtmlSummary"
+
+# Open the report
+start .\TestResults\CoverageReport\index.html
+```
+
+## Architecture (quick overview)
+
+- `Program.cs` wires up DI, loads `BetOptions` from configuration, and runs `GameRunnerService`.
+- `GameRunnerService` handles the CLI menu and orchestrates:
+  - `WalletService` for deposit/withdraw/balance updates.
+  - `BetEngineService` for the betting round (random rolls, win logic).
+- `ConsoleWrapper` abstracts console IO for easier testing.
+- `Wallet` provides a basic in-memory implementation of `IWallet`.
 
 ## License
 
-Add your preferred license here (e.g., MIT).
+This project is provided as-is for learning and demonstration purposes.
