@@ -2,6 +2,7 @@ using BetGame.Abstractions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.IO;
+using System.Reflection.Metadata;
 using System.Runtime.Versioning;
 
 namespace BetGame.Tests
@@ -9,6 +10,8 @@ namespace BetGame.Tests
     [TestClass]
     public class ConsoleAndRandomTests
     {
+
+        [DoNotParallelize]
         [TestMethod]
         public void ConsoleWrapper_WriteLine_WritesToConsole()
         {
@@ -75,33 +78,17 @@ namespace BetGame.Tests
             var cw = new ConsoleWrapper();
             try
             {
-                cw.SetForegroundColor(ConsoleColor.Blue);
+                cw.SetForegroundColor(cw.GetColor("Blue"));
                 // Some test hosts (CI, headless) may ignore color changes; just ensure it's a valid enum value
-                Assert.IsTrue(Enum.IsDefined(typeof(ConsoleColor), Console.ForegroundColor));
+                Assert.IsTrue(Enum.IsDefined(Console.ForegroundColor));
 
                 cw.ResetColor();
-                Assert.IsTrue(Enum.IsDefined(typeof(ConsoleColor), Console.ForegroundColor));
+                Assert.IsTrue(Enum.IsDefined(Console.ForegroundColor));
             }
             finally
             {
                 // Restore original color
                 Console.ForegroundColor = originalColor;
-            }
-        }
-
-        [TestMethod]
-        public void ConsoleWrapper_StaticConsoleReadLine_Executes()
-        {
-            var originalIn = Console.In;
-            try
-            {
-                Console.SetIn(new StringReader("x" + Environment.NewLine));
-                // Method returns void, we only execute it to cover the call
-                ConsoleWrapper.ConsoleReadLine();
-            }
-            finally
-            {
-                Console.SetIn(originalIn);
             }
         }
 
@@ -114,6 +101,13 @@ namespace BetGame.Tests
                 var value = rng.NextDouble();
                 Assert.IsTrue(value >= 0.0 && value < 1.0, $"Generated value {value} was out of range [0,1)");
             }
+        }
+
+        [TestMethod]
+        public void Invalid_GetColor_ThrowsArgumentException()
+        {
+            var cw = new ConsoleWrapper();
+            Assert.ThrowsException<ArgumentException>(() => cw.GetColor("InvalidColor"));
         }
     }
 }

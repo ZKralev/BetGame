@@ -30,40 +30,40 @@ namespace BetGame.Tests
         }
 
         [TestMethod]
-        public async Task RunAsync_ExitImmediately_PrintsThankYou()
+        public void Run_ExitImmediately_PrintsThankYou()
         {
             _consoleMock.SetupSequence(c => c.ReadLine())
                 .Returns("0");
-            await _gameRunner.RunAsync();
+            _gameRunner.Run();
             _consoleMock.Verify(c => c.WriteLine("Thank you for playing!"), Times.Once);
         }
 
         [TestMethod]
-        public async Task RunAsync_InvalidMenuOption_PrintsInvalidChoice()
+        public void Run_InvalidMenuOption_PrintsInvalidChoice()
         {
             _consoleMock.SetupSequence(c => c.ReadLine())
                 .Returns("invalid")
                 .Returns("0");
-            await _gameRunner.RunAsync();
+            _gameRunner.Run();
             _consoleMock.Verify(c => c.WriteLine("Invalid choice"), Times.Once);
         }
 
         [TestMethod]
-        public async Task RunAsync_Deposit_CallsWalletDeposit()
+        public void Run_Deposit_CallsWalletDeposit()
         {
             _consoleMock.SetupSequence(c => c.ReadLine())
                 .Returns("1")    
                 .Returns("100")  
                 .Returns("0");   
             
-            await _gameRunner.RunAsync();
+            _gameRunner.Run();
             
             _walletCoreMock.Verify(w => w.Deposit(100), Times.Once);
             _consoleMock.Verify(c => c.WriteLine(It.Is<string>(s => s.StartsWith("Deposited $100"))), Times.AtLeastOnce);
         }
 
         [TestMethod]
-        public async Task RunAsync_Withdraw_CallsWalletWithdraw()
+        public void Run_Withdraw_CallsWalletWithdraw()
         {
             _consoleMock.SetupSequence(c => c.ReadLine())
                 .Returns("2")   
@@ -71,12 +71,12 @@ namespace BetGame.Tests
                 .Returns("0");  
             _walletCoreMock.SetupGet(w => w.Balance).Returns(100);
             _walletCoreMock.Setup(w => w.Withdraw(It.IsAny<double>()));
-            await _gameRunner.RunAsync();
+            _gameRunner.Run();
             _walletCoreMock.Verify(w => w.Withdraw(50), Times.Once);
         }
 
         [TestMethod]
-        public async Task RunAsync_PlaceBet_ValidBet_UpdatesBalanceAndPrintsMessage()
+        public void Run_PlaceBet_ValidBet_UpdatesBalanceAndPrintsMessage()
         {
             _consoleMock.SetupSequence(c => c.ReadLine())
                 .Returns("3") 
@@ -84,11 +84,11 @@ namespace BetGame.Tests
                 .Returns("0"); 
 
 
-            var betResult = new BetResult(0, "You win!", 10, ConsoleColor.Green);
+            var betResult = new BetResult("You win!", 10, _consoleMock.Object.GetColor("Green"));
             _betEngineMock.Setup(b => b.PlayRound(5)).Returns(betResult);
             _walletCoreMock.SetupGet(w => w.Balance).Returns(100);
 
-            await _gameRunner.RunAsync();
+            _gameRunner.Run();
 
             _betEngineMock.Verify(b => b.PlayRound(5), Times.Once);
             _walletCoreMock.Verify(w => w.SetBalance(105), Times.Once);
@@ -96,18 +96,18 @@ namespace BetGame.Tests
         }
 
         [TestMethod]
-        public async Task RunAsync_PlaceBet_InvalidBet_PrintsError()
+        public void Run_PlaceBet_InvalidBet_PrintsError()
         {
             _consoleMock.SetupSequence(c => c.ReadLine())
                 .Returns("3") 
                 .Returns("notanumber")
                 .Returns("0"); 
 
-            var betResult = new BetResult(0, "No win", 0, ConsoleColor.Red);
+            var betResult = new BetResult("No win", 0, _consoleMock.Object.GetColor("Red"));
             _betEngineMock.Setup(b => b.PlayRound(0)).Returns(betResult);
             _walletCoreMock.SetupGet(w => w.Balance).Returns(50);
 
-            await _gameRunner.RunAsync();
+            _gameRunner.Run();
 
             _betEngineMock.Verify(b => b.PlayRound(0), Times.Once);
             _walletCoreMock.Verify(w => w.SetBalance(50), Times.Once);
@@ -115,7 +115,7 @@ namespace BetGame.Tests
         }
 
         [TestMethod]
-        public async Task RunAsync_ExceptionDuringAction_PrintsError()
+        public void Run_ExceptionDuringAction_PrintsError()
         {
             _consoleMock.SetupSequence(c => c.ReadLine())
                 .Returns("1")   
@@ -123,7 +123,7 @@ namespace BetGame.Tests
                 .Returns("0");   
             _walletCoreMock.Setup(w => w.Deposit(100)).Throws(new Exception("Deposit failed"));
 
-            await _gameRunner.RunAsync();
+            _gameRunner.Run();
 
             _consoleMock.Verify(c => c.WriteLine(It.Is<string>(s => s.Contains("Error: Deposit failed"))), Times.Once);
         }

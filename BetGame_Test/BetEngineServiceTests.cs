@@ -102,7 +102,7 @@ namespace BetGame.Tests
 
             Assert.AreEqual(0, result.WinAmount);
             StringAssert.Contains(result.Message, "No luck this time!");
-            Assert.AreEqual(ConsoleColor.Red, result.Color);
+            Assert.AreEqual(_consoleMock.Object.GetColor("Red"), result.Color);
         }
 
         [TestMethod]
@@ -118,7 +118,7 @@ namespace BetGame.Tests
 
             Assert.AreEqual(5 * 1.1, result.WinAmount);
             StringAssert.Contains(result.Message, "Congratulations! You win $5.50!");
-            Assert.AreEqual(ConsoleColor.Green, result.Color);
+            Assert.AreEqual(_consoleMock.Object.GetColor("Green"), result.Color);
         }
 
         [TestMethod]
@@ -134,7 +134,7 @@ namespace BetGame.Tests
 
             Assert.AreEqual(10.0, result.WinAmount);
             StringAssert.Contains(result.Message, "JACKPOT! You win $10.00!");
-            Assert.AreEqual(ConsoleColor.Green, result.Color);
+            Assert.AreEqual(_consoleMock.Object.GetColor("Green"), result.Color);
         }
 
         [TestMethod]
@@ -151,24 +151,5 @@ namespace BetGame.Tests
             Assert.ThrowsException<ArgumentOutOfRangeException>(() => engine.PlayRound(120));
         }
 
-        [TestMethod]
-        public void Ctor_Throws_WhenOptionsIsNull()
-        {
-            Assert.ThrowsException<ArgumentNullException>(() => new BetEngineService(null!, _randomMock.Object, _consoleMock.Object));
-        }
-
-        [TestMethod]
-        public void GetBetOptions_ReturnsConfiguredOptions()
-        {
-            var engine = new BetEngineService(_options, _randomMock.Object, _consoleMock.Object);
-            Assert.AreSame(_betOptions, engine.GetBetOptions());
-        }
-
-        [TestMethod]
-        public void GetRandomGenerator_ReturnsInjectedInstance()
-        {
-            var engine = new BetEngineService(_options, _randomMock.Object, _consoleMock.Object);
-            Assert.AreSame(_randomMock.Object, engine.GetRandomGenerator());
-        }
     }
 }

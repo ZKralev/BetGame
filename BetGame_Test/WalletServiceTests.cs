@@ -28,7 +28,7 @@ namespace BetGame.Tests
             _service.Deposit();
 
             _wallet.Verify(w => w.Deposit(100), Times.Once);
-            _console.Verify(c => c.SetForegroundColor(ConsoleColor.Green), Times.Once);
+            _console.Verify(c => c.SetForegroundColor(_console.Object.GetColor("Green")), Times.Once);
             _console.Verify(c => c.WriteLine(It.Is<string>(s => s.StartsWith("Deposited $100"))), Times.Once);
             _console.Verify(c => c.ResetColor(), Times.Once);
         }
@@ -41,7 +41,7 @@ namespace BetGame.Tests
             var ex = Assert.ThrowsException<ArgumentException>(() => _service.Deposit());
             StringAssert.Contains(ex.Message, "Deposit amount must be positive.");
 
-            _console.Verify(c => c.SetForegroundColor(ConsoleColor.Red), Times.Once);
+            _console.Verify(c => c.SetForegroundColor(_console.Object.GetColor("Red")), Times.Once);
             _console.Verify(c => c.WriteLine("Invalid amount."), Times.Once);
             _console.Verify(c => c.ResetColor(), Times.Once);
         }
@@ -55,7 +55,7 @@ namespace BetGame.Tests
             _service.Withdraw();
 
             _wallet.Verify(w => w.Withdraw(50), Times.Once);
-            _console.Verify(c => c.SetForegroundColor(ConsoleColor.Yellow), Times.Once);
+            _console.Verify(c => c.SetForegroundColor(_console.Object.GetColor("Yellow")), Times.Once);
             _console.Verify(c => c.WriteLine(It.Is<string>(s => s.StartsWith("Withdraw $50"))), Times.Once);
             _console.Verify(c => c.ResetColor(), Times.Once);
         }
@@ -69,7 +69,7 @@ namespace BetGame.Tests
             var ex = Assert.ThrowsException<InvalidOperationException>(() => _service.Withdraw());
             StringAssert.Contains(ex.Message, "Insufficient funds");
 
-            _console.Verify(c => c.SetForegroundColor(ConsoleColor.Red), Times.Once);
+            _console.Verify(c => c.SetForegroundColor(_console.Object.GetColor("Red")), Times.Once);
             _console.Verify(c => c.WriteLine("Insufficient funds."), Times.Once);
             _console.Verify(c => c.ResetColor(), Times.Once);
             _wallet.Verify(w => w.Withdraw(It.IsAny<double>()), Times.Never);
@@ -83,7 +83,7 @@ namespace BetGame.Tests
             var ex = Assert.ThrowsException<ArgumentException>(() => _service.Withdraw());
             StringAssert.Contains(ex.Message, "Withdraw amount must be positive.");
 
-            _console.Verify(c => c.SetForegroundColor(ConsoleColor.Red), Times.Once);
+            _console.Verify(c => c.SetForegroundColor(_console.Object.GetColor("Red")), Times.Once);
             _console.Verify(c => c.WriteLine("Invalid amount."), Times.Once);
             _console.Verify(c => c.ResetColor(), Times.Once);
         }
