@@ -9,7 +9,7 @@ namespace BetGame;
 
 internal class Program
 {
-    static async Task Main(string[] args)
+    static Task Main(string[] args)
     {
         var configuration = new ConfigurationBuilder()
             .SetBasePath(AppContext.BaseDirectory)
@@ -22,13 +22,14 @@ internal class Program
             .AddScoped<WalletService>()
             .AddScoped<GameRunnerService>()
             .AddScoped<IRandomGenerator, RandomGenerator>()
-            .AddScoped<IWallet, Wallet>(_ => new Wallet(0));
+            .AddScoped<IWallet, Wallet>();
 
         services.Configure<BetOptions>(configuration.GetSection(BetOptions.SectionName));
 
         var provider = services.BuildServiceProvider();
 
         var runner = provider.GetRequiredService<GameRunnerService>();
-        await runner.RunAsync();
+        runner.Run();
+        return Task.CompletedTask;
     }
 }
