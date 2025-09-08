@@ -13,6 +13,11 @@ namespace BetGame.Abstractions
 
         public void ResetColor() => Console.ResetColor();
 
-        public static void ConsoleReadLine() => Console.ReadLine();
+        public ConsoleColor GetColor(string colorName)
+        {
+            if (Enum.TryParse<ConsoleColor>(colorName, out var color))
+                return color;
+            throw new ArgumentException($"Invalid color name: {colorName}");
+        }
     }
 }
