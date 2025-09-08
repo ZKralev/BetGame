@@ -2,6 +2,6 @@
 {
     public interface IGameRunner
     {
-        Task RunAsync();
+        void Run();
     }   
 }

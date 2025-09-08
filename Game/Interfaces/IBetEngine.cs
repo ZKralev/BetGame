@@ -6,6 +6,5 @@ namespace BetGame.Interfaces
     public interface IBetEngine
     {
         BetResult PlayRound(double stake);
-        BetOptions GetBetOptions();
     }
 }

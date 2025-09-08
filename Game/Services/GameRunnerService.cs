@@ -6,32 +6,28 @@ namespace BetGame.Services;
 
 public class GameRunnerService(WalletService walletService, IConsoleWrapper console, IBetEngine betEngine) : IGameRunner
 {
-    private readonly WalletService _walletService = walletService;
-    private readonly IConsoleWrapper _console = console;
-    private readonly IBetEngine _betEngine = betEngine;
-
-    public async Task RunAsync()
+    public void Run()
     {
         string action;
         MenuOption menuOption;
 
         do
         {
-            _console.SetTitle("Bet Game");
-            _console.WriteLine("");
-            _console.WriteLine("=== Bet Game ===");
-            _console.WriteLine("1) Deposit");
-            _console.WriteLine("2) Withdraw");
-            _console.WriteLine("3) Place Bet");
-            _console.WriteLine("0) Exit");
-            _console.WriteLine("Please submit your action: ");
-            action = (_console.ReadLine() ?? "0").Trim();
+            console.SetTitle("Bet Game");
+            console.WriteLine("");
+            console.WriteLine("=== Bet Game ===");
+            console.WriteLine("1) Deposit");
+            console.WriteLine("2) Withdraw");
+            console.WriteLine("3) Place Bet");
+            console.WriteLine("0) Exit");
+            console.WriteLine("Please submit your action: ");
+            action = (console.ReadLine() ?? "0").Trim();
 
             if (!Enum.TryParse<MenuOption>(action, out menuOption))
             {
-                _console.SetForegroundColor(ConsoleColor.Red);
-                _console.WriteLine("Invalid choice");
-                _console.ResetColor();
+                console.SetForegroundColor(console.GetColor("Red"));
+                console.WriteLine("Invalid choice");
+                console.ResetColor();
                 continue;
             }
 
@@ -40,36 +36,36 @@ public class GameRunnerService(WalletService walletService, IConsoleWrapper cons
                 switch (menuOption)
                 {
                     case MenuOption.Deposit:
-                        await Task.Run(() => _walletService.Deposit());
+                        walletService.Deposit();
                         break;
                     case MenuOption.Withdraw:
-                        await Task.Run(() => _walletService.Withdraw());
+                        walletService.Withdraw();
                         break;
                     case MenuOption.PlaceBet:
-                        _console.WriteLine($"Minimum bet: 1");
-                        _console.WriteLine($"Maximum bet: 10");
-                        _console.WriteLine("Enter your bet amount: ");
+                        console.WriteLine($"Minimum bet: 1");
+                        console.WriteLine($"Maximum bet: 10");
+                        console.WriteLine("Enter your bet amount: ");
 
-                        double stake = _console.ReadLine() is string input && double.TryParse(input, out double parsedStake) ? parsedStake : 0;
+                        double stake = console.ReadLine() is string input && double.TryParse(input, out double parsedStake) ? parsedStake : 0;
 
-                        BetResult result = await Task.Run(() => _betEngine.PlayRound(stake));
+                        BetResult result = betEngine.PlayRound(stake);
 
-                        _walletService.UpdateBalance(stake, result.WinAmount ?? 0);
+                        walletService.UpdateBalance(stake, result.WinAmount ?? 0);
 
-                        _console.SetForegroundColor(result.Color);
-                        _console.WriteLine($"{result.Message}{_walletService.Balance:F2}");
-                        _console.ResetColor();
+                        console.SetForegroundColor(result.Color);
+                        console.WriteLine($"{result.Message}{walletService.Balance:F2}");
+                        console.ResetColor();
                         break;
                     case MenuOption.Exit:
-                        _console.WriteLine("Thank you for playing!");
+                        console.WriteLine("Thank you for playing!");
                         break;
                 }
             }
             catch (Exception ex)
             {
-                _console.SetForegroundColor(ConsoleColor.Red);
-                _console.WriteLine($"Error: {ex.Message}");
-                _console.ResetColor();
+                console.SetForegroundColor(console.GetColor("Red"));
+                console.WriteLine($"Error: {ex.Message}");
+                console.ResetColor();
             }
 
         } while (menuOption != MenuOption.Exit);
