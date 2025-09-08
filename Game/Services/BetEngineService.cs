@@ -5,45 +5,38 @@ using Microsoft.Extensions.Options;
 
 namespace BetGame.Services;
 
-public class BetEngineService(IOptions<BetOptions> options, IRandomGenerator rnd, IConsoleWrapper console) : IBetEngine
+public class BetEngineService(IOptions<BetOptions> options, IRandomGenerator random, IConsoleWrapper console) : IBetEngine
 {
-    private readonly IConsoleWrapper _console = console;
-    private readonly IRandomGenerator _randomGenerator = rnd;
-    private readonly BetOptions _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
-
-    public BetOptions GetBetOptions() => _options;
-    public IRandomGenerator? GetRandomGenerator() => _randomGenerator;
 
     public BetResult PlayRound(double stake)
     {
-        var opt = GetBetOptions() ?? throw new InvalidOperationException("Bet options are not configured.");
 
-        if (stake < opt.SmallestBet || stake > opt.BiggestBet)
-            throw new ArgumentOutOfRangeException($"Bet must be between {opt.SmallestBet} and {opt.BiggestBet}.");
+        if (stake < options.Value.SmallestBet || stake > options.Value.BiggestBet)
+            throw new ArgumentOutOfRangeException($"Bet must be between {options.Value.SmallestBet} and {options.Value.BiggestBet}.");
 
         double winAmount;
         double jackpotMult;
-        double roll = GetRandomMultiplier(opt.MinimalRoll, opt.MaxRoll);
+        double roll = GetRandomMultiplier(options.Value.MinimalRoll, options.Value.MaxRoll);
 
         if (roll <= 0.5)
-            return new BetResult(roll, "No luck this time! Your current balance is: $", 0, ConsoleColor.Red);
+            return new BetResult("No luck this time! Your current balance is: $", 0, console.GetColor("Red"));
 
         if (roll <= 0.9)
         {
-            jackpotMult = GetRandomMultiplier(opt.SmallWin.WinRatioStart, opt.SmallWin.WinRatioEnd);
+            jackpotMult = GetRandomMultiplier(options.Value.SmallWin.WinRatioStart, options.Value.SmallWin.WinRatioEnd);
             winAmount = stake * jackpotMult;
-            return new BetResult(roll, $"Congratulations! You win ${winAmount:F2}! Your current balance is: $", winAmount, ConsoleColor.Green);
+            return new BetResult($"Congratulations! You win ${winAmount:F2}! Your current balance is: $", winAmount, console.GetColor("Green"));
         }
 
-        jackpotMult = GetRandomMultiplier(opt.BigWin.WinRatioStart, opt.BigWin.WinRatioEnd);
+        jackpotMult = GetRandomMultiplier(options.Value.BigWin.WinRatioStart, options.Value.BigWin.WinRatioEnd);
         winAmount = stake * jackpotMult;
-        return new BetResult(roll, $"JACKPOT! You win ${winAmount:F2}! Your current balance is: $", winAmount, ConsoleColor.Green);
+        return new BetResult($"JACKPOT! You win ${winAmount:F2}! Your current balance is: $", winAmount, console.GetColor("Green"));
     }
 
     private double GetRandomMultiplier(double min, double max)
     {
-        var rnd = GetRandomGenerator() ?? throw new InvalidOperationException("Random generator is not initialized.");
+        var rnd = random ?? throw new InvalidOperationException("Random generator is not initialized.");
         var multiplier = min + max * rnd.NextDouble();
-        return (double)multiplier;
+        return multiplier;
     }
 }

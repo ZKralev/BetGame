@@ -1,20 +1,9 @@
 ﻿namespace BetGame.Abstractions
 {
-    public class BetResult
+    public class BetResult(string message, double? winAmount, ConsoleColor color)
     {
-        public double Roll { get; set; }
-        public string Message { get; set; }
-
-        public double? WinAmount { get; set; }
-        public ConsoleColor Color { get; set; }
-
-        public BetResult(double roll, string message, double winAmount, ConsoleColor color)
-        {
-            Roll = Roll;
-            Message = message;
-            WinAmount = winAmount;
-            Color = color;
-        }
-
+        public string Message { get; } = message;
+        public double? WinAmount { get; } = winAmount;
+        public ConsoleColor Color { get; } = color;
     }
 }

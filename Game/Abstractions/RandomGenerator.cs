@@ -4,7 +4,7 @@ namespace BetGame.Abstractions
 {
     public class RandomGenerator : IRandomGenerator
     {
-        private readonly Random _random = new();
-        public double NextDouble() => _random.NextDouble();
+        private readonly Random random = new();
+        public double NextDouble() => random.NextDouble();
     }
 }
