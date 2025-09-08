@@ -2,9 +2,9 @@
 
 namespace BetGame.Abstractions
 {
-    public class Wallet(double initialBalance) : IWallet
+    public class Wallet : IWallet
     {
-        public double Balance { get; private set; } = initialBalance >= 0 ? initialBalance : 0;
+        public double Balance { get; private set; } = 0;
 
         public void Deposit(double amount)
         {
@@ -24,7 +24,7 @@ namespace BetGame.Abstractions
 
         public void SetBalance(double newBalance)
         {
-            Balance = newBalance;
+            Balance = newBalance < 0 ? 0 : newBalance;
         }
     }
 }
